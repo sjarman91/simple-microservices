@@ -1,0 +1,7 @@
+.DS_Store
+api/.DS_Store
+identity-service/.DS_Store
+
+node_modules
+api/node_modules
+identity-service/node_modules

@@ -1,0 +1,22 @@
+{
+  "name": "better-node-project-structure",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "audit": "nsp check",
+    "compile": "rimraf build && babel src --out-dir build --source-maps inline",
+    "compile:watch": "rimraf build && babel src --watch --out-dir build --source-maps inline",
+    "dev": "npm run compile:watch & sleep 10 && nodemon --watch build build/index.js | pino"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "hemera-joi": "^0.1.78",
+    "hemera-zipkin": "^0.3.2",
+    "nats": "^0.7.4",
+    "nats-hemera": "^0.8.1",
+    "pg": "^6.1.5",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^3.30.2"
+  }
+}

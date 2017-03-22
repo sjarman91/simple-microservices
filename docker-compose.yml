@@ -1,0 +1,51 @@
+version: "2.0"
+
+services:
+  nats:
+    build:
+      context: "./nats"
+    expose:
+      - "4222"
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    hostname: nats-server
+
+  api:
+    build:
+      context: "./api"
+    depends_on:
+      - nats
+    expose:
+      - "8789"
+    ports:
+      - "8789:8789"
+    environment:
+      NATS_URL: nats://nats:4222
+      NATS_USER: ruser
+      NATS_PW: T0pS3cr3t
+      API_PORT: 8789
+      API_HOST: 0.0.0.0
+      HEMERA_LOG_LEVEL: silent
+
+  identity-service:
+    build:
+      context: "./identity-service"
+    links:
+      - nats
+      - db
+    depends_on:
+      - nats
+    restart: always
+    environment:
+      NATS_URL: nats://nats:4222
+      NATS_USER: ruser
+      NATS_PW: T0pS3cr3t
+      HEMERA_LOG_LEVEL: silent
+      PG_HOST: db
+      PG_DB_NAME: postgres
+      PG_USER: postgres
+      PG_PORT: 5432
+
+  db:
+    image: postgres

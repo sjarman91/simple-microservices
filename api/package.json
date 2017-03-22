@@ -1,0 +1,16 @@
+{
+  "name": "better-node-project-structure",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "audit": "nsp check"
+  },
+  "dependencies": {
+    "boom": "^4.2.0",
+    "hapi": "^16.1.0",
+    "hemera-zipkin": "^0.3.2",
+    "nats": "^0.7.2",
+    "nats-hemera": "^0.8.1"
+  }
+}
