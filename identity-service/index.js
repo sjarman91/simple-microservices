@@ -2,30 +2,37 @@ const Hemera = require('nats-hemera');
 const HemeraJoi = require('hemera-joi');
 const db = require('./db');
 
+// connect to nats
 const nats = require('nats').connect({
   url: process.env.NATS_URL,
   user: process.env.NATS_USER,
   pass: process.env.NATS_PW,
 });
 
+// create Hemera wrapper around core NATS driver
 const hemera = new Hemera(nats, {
   logLevel: process.env.HEMERA_LOG_LEVEL,
 });
 
+// helper for syncing db
 const sync = () => {
   db.sequelize.sync()
   .then(() => { console.log('db synced'); })
   .catch(console.error);
 };
 
+// inject Joi so we can use inside of Herera actions
 hemera.use(HemeraJoi);
 
+
+// when ready, connect to db and add subscibers
 hemera.ready(() => {
   const Joi = hemera.exposition['hemera-joi'].joi;
 
   // wait 3 seconds to connect to db
   setTimeout(sync, 3000);
 
+  // on auth signup action, create new user and respond with data
   hemera.add({
     topic: 'auth',
     cmd: 'signup',
@@ -44,9 +51,10 @@ hemera.ready(() => {
     .catch((err) => {
       console.log('in da error')
       return cb(null, { success: false, message: 'Error' })
-    })
+    });
   });
 
+  // on get users actions, responsd with array of users from the db
   hemera.add({
     topic: 'users',
     cmd: 'get',
@@ -59,6 +67,6 @@ hemera.ready(() => {
     .catch((err) => {
       console.log('in da error')
       return cb(null, { success: false, message: 'Error' })
-    })
+    });
   });
 });

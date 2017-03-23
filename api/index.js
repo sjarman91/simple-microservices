@@ -2,12 +2,14 @@ const Hapi = require('hapi');
 const Hemera = require('nats-hemera');
 const Boom = require('boom');
 
+// connect to nats
 const nats = require('nats').connect({
   url: process.env.NATS_URL,
   user: process.env.NATS_USER,
   pass: process.env.NATS_PW,
 });
 
+// create and configure new server
 const server = new Hapi.Server();
 
 server.connection({
@@ -15,9 +17,14 @@ server.connection({
   host: process.env.API_HOST,
 });
 
+// create Hemera wrapper around core NATS driver
 const hemera = new Hemera(nats, {
   logLevel: process.env.HEMERA_LOG_LEVEL,
 });
+
+/* ----- Hapi API Handlers ------
+*  Use the nats server to get data from microservices, then reply with result
+*/
 
 const signuphandler = function (request, reply) {
   hemera.act({
@@ -43,7 +50,9 @@ const getusershandler = function (request, reply) {
   });
 };
 
+/* When hemera is ready and connected to nats, start the hapi server */
 hemera.ready(() => {
+  // handlers connect external requests to internal data
   server.route({
     method: 'POST',
     path: '/api/signup',
