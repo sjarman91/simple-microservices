@@ -80,4 +80,15 @@ sequelize.define('user', {
 const db = {};
 
 db.sequelize = sequelize;
-module.exports = db;
+
+// helper for syncing db
+const sync = () => {
+  db.sequelize.sync()
+  .then(() => { console.log('db synced'); })
+  .catch(console.error);
+};
+
+module.exports = {
+  db,
+  sync,
+};

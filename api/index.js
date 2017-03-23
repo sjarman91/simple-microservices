@@ -2,7 +2,10 @@ const Hapi = require('hapi');
 const Hemera = require('nats-hemera');
 const Boom = require('boom');
 
-// connect to nats & create Hemera wrapper around core NATS driver
+/* ----- Hemera and NATS configuration -----
+* Connect to nats & create Hemera wrapper around core NATS driver
+*/
+
 const nats = require('nats').connect({
   url: process.env.NATS_URL,
   user: process.env.NATS_USER,
@@ -13,16 +16,17 @@ const hemera = new Hemera(nats, {
   logLevel: process.env.HEMERA_LOG_LEVEL,
 });
 
-// create and configure new server
+/* ----- Hapi Server Set Up ------
+* Hapi handles external requests, and uses route handlers to get data from the
+* appropriate microservices.
+*/
+
 const server = new Hapi.Server();
+
 server.connection({
   port: process.env.API_PORT,
   host: process.env.API_HOST,
 });
-
-/* ----- Hapi API Handlers ------
-*  Use the nats server to get data from microservices, then reply with result
-*/
 
 const signuphandler = function (request, reply) {
   hemera.act({
@@ -48,21 +52,20 @@ const getusershandler = function (request, reply) {
   });
 };
 
-/* When hemera is ready and connected to nats, start the hapi server */
+server.route({
+  method: 'POST',
+  path: '/api/signup',
+  handler: signuphandler,
+});
+
+server.route({
+  method: 'GET',
+  path: '/api/users',
+  handler: getusershandler,
+});
+
+/* Start the server! (but wait until we are connected to NATS) */
 hemera.ready(() => {
-  // handlers connect external requests to internal data
-  server.route({
-    method: 'POST',
-    path: '/api/signup',
-    handler: signuphandler,
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/api/users',
-    handler: getusershandler,
-  });
-
   server.start((err) => {
     if (err) throw err;
     console.log(`Server running at: ${server.info.uri}`);
